@@ -1,0 +1,49 @@
+<?php
+
+namespace App\Modules\Deployer\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class DeployedServer extends Model
+{
+    protected $fillable = [
+        'branch_name',
+        'type',
+        'status',
+        'steps',
+    ];
+
+    protected $casts = [
+        'steps' => 'array',
+    ];
+
+    public function deploymentLogs()
+    {
+        return $this->hasMany(DeploymentLog::class);
+    }
+
+    public function logStep(string $message): void
+    {
+        $this->deploymentLogs()->create([
+            'message' => $message,
+            'status' => 'in_progress',
+        ]);
+    }
+
+    public function updateStatus(string $status): void
+    {
+        $this->update(['status' => $status]);
+    }
+    public function updateSteps(array $steps): void
+    {
+        $this->update(['steps' => $steps]);
+    }
+    public function updateBranchName(string $branchName): void
+    {
+        $this->update(['branch_name' => $branchName]);
+    }
+    public function updateType(string $type): void
+    {
+        $this->update(['type' => $type]);
+    }
+}
