@@ -23,7 +23,7 @@ class DeployServer implements ShouldQueue
             $this->server->update(['status' => 'failed']);
             $this->server->logStep("Failed to prepare deployment directory.");
         }
-    
+
         // Dispatch the batch of jobs for actual deployment steps
         DeployServerBatch::dispatch($this->server);
     }

@@ -19,11 +19,11 @@ class CreateNginxConfig implements ShouldQueue
     public function handle(): void
     {
         $this->server->logStep("Creating Nginx configuration...");
-        $nginxPath = base_path("deployments/{$this->server->branch}/nginx/config");
+        $nginxPath = base_path("deployments/{$this->server->branch_name}/nginx/config");
 
         // Create Nginx config file
 
-        $result = $this->nginx->generateNginxConfig($nginxPath, 8000, $this->server->branch);
+        $result = $this->nginx->generateNginxConfig($nginxPath, 8000, $this->server->branch_name);
         if ($result) {
             $this->server->logStep("Nginx configuration created at {$nginxPath}");
         } else {
@@ -31,6 +31,5 @@ class CreateNginxConfig implements ShouldQueue
             $this->server->updateStatus('failed');
             return;
         }
-
     }
 }

@@ -11,16 +11,23 @@ class DeployedServerObserver
 {
     public function created(DeployedServer $server): void
     {
+        self::init($server);
+    }
+
+    public function saved(DeployedServer $server): void
+    {
+        if ($server->isDirty('status')) {
+        }
+
+        // if (!$server->isDirty('status') && $server->status == 'pending') {
+        //     self::init($server);
+        // }
+    }
+
+    private static function init($server)
+    {
         $deployer = App::make(DeployerInterface::class);
 
         DeployServer::dispatch($server, $deployer);
     }
-
-    public function updated(DeployedServer $server): void
-    {
-        if ($server->isDirty('status')) {
-            
-        }
-    }
-
 }

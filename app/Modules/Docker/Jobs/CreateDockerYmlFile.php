@@ -21,10 +21,10 @@ class CreateDockerYmlFile implements ShouldQueue
     {
         $this->server->logStep("Creating Docker compose file...");
 
-        $dockerPath = base_path("deployments/{$this->server->branch}/docker");
+        $dockerPath = base_path("deployments/{$this->server->branch_name}/docker");
 
         // Create YML file
-        $result = $this->docker->generateDockerComposeFile($dockerPath, 8000, $this->server->branch);
+        $result = $this->docker->generateDockerComposeFile($dockerPath, 8000, $this->server->branch_name);
         if ($result) {
             $this->server->logStep("Docker compose file created at {$dockerPath}");
         } else {
@@ -32,7 +32,5 @@ class CreateDockerYmlFile implements ShouldQueue
             $this->server->updateStatus('failed');
             return;
         }
-
     }
 }
-

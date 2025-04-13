@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\File;
 
 class NginxRepository implements NginxInterface
 {
-    public function generateNginxConfig(string $path, int $basePort = 8000, string $branch = 'main'): array
+    public function generateNginxConfig(string $path, int $basePort = 8000, ?string $branch = 'main'): array
     {
         $serverName = "{$branch}.api.com";
 
@@ -57,7 +57,7 @@ class NginxRepository implements NginxInterface
         ];
     }
 
-    public function finalizeNginxSetup(string $path, string $branch = 'main'): array
+    public function finalizeNginxSetup(string $path, ?string $branch = 'main'): array
     {
         $nginxConfPath = "{$path}/default.conf";
 
@@ -93,5 +93,4 @@ class NginxRepository implements NginxInterface
             'path' => $nginxConfPath,
         ];
     }
-
 }

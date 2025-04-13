@@ -20,10 +20,10 @@ class FinalizeNginxSetup implements ShouldQueue
     {
         $this->server->logStep("Finalizing Nginx setup...");
 
-        $nginxPath = base_path("deployments/{$this->server->branch}/nginx/config");
+        $nginxPath = base_path("deployments/{$this->server->branch_name}/nginx/config");
 
         // Finalize Nginx setup
-        $result = $this->nginx->finalizeNginxSetup($nginxPath, $this->server->branch);
+        $result = $this->nginx->finalizeNginxSetup($nginxPath, $this->server->branch_name);
         if ($result) {
             $this->server->logStep("Nginx setup finalized successfully.");
         } else {

@@ -2,17 +2,19 @@
 
 namespace App\Modules\Deployer\Repositories;
 
+use App\Modules\Deployer\Interfaces\DeployerInterface;
 use App\Modules\Deployer\Models\DeployedServer;
 use App\Modules\Deployer\Services\DeployerService;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 
-class DeployerRepository
+class DeployerRepository implements DeployerInterface
 {
     /**
      * Start deployment by dispatching a job.
      *
      * @param  string  $branchName
      * @param  string  $type
+     * @param  string  $repositoryUrl
      * @return void
      */
     public function deploy(string $branchName, string $type, string $repositoryUrl): void
@@ -27,20 +29,31 @@ class DeployerRepository
      * @param DeployedServer $server
      * @return bool
      */
+
     public static function prepareDeploymentDirectory(DeployedServer $server): bool
     {
         try {
-            $basePath = "deployments/{$server->branch_name}";
+            $basePath = base_path("deployments/{$server->branch_name}");
 
             // Attempt to create directories
-            Storage::makeDirectory("{$basePath}/app");
-            Storage::makeDirectory("{$basePath}/nginx");
-            Storage::makeDirectory("{$basePath}/docker");
+            File::ensureDirectoryExists("{$basePath}/app");
+            File::ensureDirectoryExists("{$basePath}/nginx");
+            File::ensureDirectoryExists("{$basePath}/nginx/logs");
+            File::ensureDirectoryExists("{$basePath}/docker");
 
-            // Optionally store base path in meta
+            $logDirectory = "{$basePath}/nginx/logs";
+
+            if (!File::exists("{$logDirectory}/error.log")) {
+                File::put("{$logDirectory}/error.log", '');
+            }
+
+            if (!File::exists("{$logDirectory}/access.log")) {
+                File::put("{$logDirectory}/access.log", '');
+            }
+
             $server->update([
                 'meta' => array_merge($server->meta ?? [], [
-                    'deployment_path' => $basePath
+                    'deployment_path' => "deployments/{$server->branch_name}"
                 ])
             ]);
 

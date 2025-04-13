@@ -20,7 +20,7 @@ class SetupGit implements ShouldQueue
     {
         $this->server->logStep("Setting up Git repository...");
 
-        $deploymentPath = base_path("deployments/{$this->server->branch}");
+        $deploymentPath = base_path("deployments/{$this->server->branch_name}");
         $gitPath = $deploymentPath . "/app";
 
         if (!is_dir($deploymentPath)) {
@@ -30,17 +30,16 @@ class SetupGit implements ShouldQueue
         $cloneResult = $this->git->cloneRepository(
             $this->server->repository_url,  // Repository URL from server config
             $gitPath,                       // Target path
-            $this->server->branch           // Target branch
+            $this->server->branch_name      // Target branch
         );
 
         if ($cloneResult['status'] === 'success') {
             $this->server->logStep("Git repository cloned successfully: {$cloneResult['message']}");
 
-            $checkoutResult = $this->git->checkoutBranch($gitPath, $this->server->branch);
-            
+            $checkoutResult = $this->git->checkoutBranch($gitPath, $this->server->branch_name);
+
             if ($checkoutResult['status'] === 'success') {
-                $this->server->logStep("Successfully checked out branch: {$this->server->branch}");
-                
+                $this->server->logStep("Successfully checked out branch: {$this->server->branch_name}");
             } else {
                 $this->server->logStep("Failed to checkout branch: {$checkoutResult['message']}");
                 $this->server->updateStatus('failed');
@@ -48,12 +47,12 @@ class SetupGit implements ShouldQueue
             }
         } else {
             $this->server->logStep("Failed to clone repository: {$cloneResult['message']}");
-            
+
             if (is_dir($gitPath . '/.git')) {
                 $this->server->logStep("Repository already exists, attempting to pull latest changes...");
-                
-                $pullResult = $this->git->pullChanges($gitPath, $this->server->branch);
-                
+
+                $pullResult = $this->git->pullChanges($gitPath, $this->server->branch_name);
+
                 if ($pullResult['status'] === 'success') {
                     $this->server->logStep("Successfully pulled latest changes: {$pullResult['message']}");
                 } else {
@@ -68,6 +67,5 @@ class SetupGit implements ShouldQueue
         }
 
         $this->server->logStep("Git repository setup completed successfully.");
-
     }
 }

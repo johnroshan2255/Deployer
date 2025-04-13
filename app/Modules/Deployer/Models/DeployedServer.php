@@ -11,10 +11,12 @@ class DeployedServer extends Model
         'type',
         'status',
         'steps',
+        'meta',
     ];
 
     protected $casts = [
         'steps' => 'array',
+        'meta' => 'array',
     ];
 
     public function deploymentLogs()

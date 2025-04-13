@@ -11,7 +11,7 @@ class DockerRepository implements DockerInterface
 {
     use DeployTrait;
 
-    public function generateDockerComposeFile(string $path, int $basePort = 8000, string $branch = 'main'): array
+    public function generateDockerComposeFile(string $path, int $basePort = 8000, ?string $branch = 'main'): array
     {
         $servicePorts = [
             Docker::APP   => 80,
@@ -125,7 +125,7 @@ class DockerRepository implements DockerInterface
         return $block;
     }
 
-    public function startDockerContainers(string $path, string $branch = 'main'): array
+    public function startDockerContainers(string $path, ?string $branch = 'main'): array
     {
         $command = "docker-compose -f {$path}/docker-compose.yml up -d";
         $output = [];

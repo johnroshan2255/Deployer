@@ -20,9 +20,9 @@ class StartDockerContainers implements ShouldQueue
     {
         $this->server->logStep("Starting Docker containers...");
 
-        $dockerPath = base_path("deployments/{$this->server->branch}/docker");
+        $dockerPath = base_path("deployments/{$this->server->branch_name}/docker");
         // Start Docker containers
-        $result = $this->docker->startDockerContainers($dockerPath, $this->server->branch);
+        $result = $this->docker->startDockerContainers($dockerPath, $this->server->branch_name);
         if ($result) {
             $this->server->logStep("Docker containers started successfully.");
         } else {

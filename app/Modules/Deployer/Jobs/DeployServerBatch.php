@@ -27,9 +27,8 @@ class DeployServerBatch
             new SetupGit($server, $git),
             new CreateNginxConfig($server, $nginx),
             new FinalizeNginxSetup($server, $nginx),
-            new StartDockerContainers($server, $docker),
+            // new StartDockerContainers($server, $docker),
         ])
-        ->dispatch($server, $docker);
+            ->dispatch($server, $docker);
     }
 }
-
