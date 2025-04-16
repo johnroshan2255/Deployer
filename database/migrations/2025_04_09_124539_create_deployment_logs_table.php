@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('deployment_logs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('deployed_server_id')->constrained()->cascadeOnDelete();
-            $table->string('message');
+            $table->text('message')->nullable();
             $table->string('status')->default('info'); // info | success | failed
             $table->timestamps();
         });

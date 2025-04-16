@@ -3,6 +3,7 @@
 namespace App\Modules\Deployer\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class DeployedServer extends Model
 {
@@ -24,11 +25,11 @@ class DeployedServer extends Model
         return $this->hasMany(DeploymentLog::class);
     }
 
-    public function logStep(string $message): void
+    public function logStep(string $message, ? string $status = 'in_progress'): void
     {
         $this->deploymentLogs()->create([
-            'message' => $message,
-            'status' => 'in_progress',
+            'message' => Str::limit($message, 2000),
+            'status' => $status,
         ]);
     }
 

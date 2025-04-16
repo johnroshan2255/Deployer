@@ -3,7 +3,7 @@
 namespace App\Modules\Docker\Jobs;
 
 use App\Modules\Deployer\Models\DeployedServer;
-use App\Modules\Docker\Interfaces\DockerInterface;
+use App\Modules\Docker\Facades\DockerFacade;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -14,7 +14,7 @@ class StartDockerContainers implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public function __construct(public DeployedServer $server, protected DockerInterface $docker) {}
+    public function __construct(public DeployedServer $server) {}
 
     public function handle(): void
     {
@@ -22,11 +22,11 @@ class StartDockerContainers implements ShouldQueue
 
         $dockerPath = base_path("deployments/{$this->server->branch_name}/docker");
         // Start Docker containers
-        $result = $this->docker->startDockerContainers($dockerPath, $this->server->branch_name);
-        if ($result) {
+        $result = DockerFacade::startDockerContainers($dockerPath, $this->server->branch_name);
+        if ($result['success']) {
             $this->server->logStep("Docker containers started successfully.");
         } else {
-            $this->server->logStep("Failed to start Docker containers.");
+            $this->server->logStep($result['message'], 'failed');
             $this->server->updateStatus('failed');
             return;
         }

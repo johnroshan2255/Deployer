@@ -3,7 +3,7 @@
 namespace App\Modules\Nginx\Jobs;
 
 use App\Modules\Deployer\Models\DeployedServer;
-use App\Modules\Nginx\Interfaces\NginxInterface;
+use App\Modules\Nginx\Facades\NginxFacade;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -14,7 +14,7 @@ class FinalizeNginxSetup implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public function __construct(public DeployedServer $server, private NginxInterface $nginx) {}
+    public function __construct(public DeployedServer $server) {}
 
     public function handle(): void
     {
@@ -23,11 +23,11 @@ class FinalizeNginxSetup implements ShouldQueue
         $nginxPath = base_path("deployments/{$this->server->branch_name}/nginx/config");
 
         // Finalize Nginx setup
-        $result = $this->nginx->finalizeNginxSetup($nginxPath, $this->server->branch_name);
-        if ($result) {
+        $result = NginxFacade::finalizeNginxSetup($nginxPath, $this->server->branch_name);
+        if ($result['success']) {
             $this->server->logStep("Nginx setup finalized successfully.");
         } else {
-            $this->server->logStep("Failed to finalize Nginx setup.");
+            $this->server->logStep($result['message'], 'failed');
             $this->server->updateStatus('failed');
             return;
         }

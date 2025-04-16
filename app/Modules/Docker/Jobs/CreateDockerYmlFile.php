@@ -4,7 +4,7 @@ namespace App\Modules\Docker\Jobs;
 
 use App\Modules\Deployer\Models\DeployedServer;
 use App\Modules\Deployer\Traits\DeployTrait;
-use App\Modules\Docker\Interfaces\DockerInterface;
+use App\Modules\Docker\Facades\DockerFacade;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -15,7 +15,7 @@ class CreateDockerYmlFile implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, DeployTrait;
 
-    public function __construct(public DeployedServer $server, protected DockerInterface $docker) {}
+    public function __construct(public DeployedServer $server) {}
 
     public function handle(): void
     {
@@ -24,11 +24,11 @@ class CreateDockerYmlFile implements ShouldQueue
         $dockerPath = base_path("deployments/{$this->server->branch_name}/docker");
 
         // Create YML file
-        $result = $this->docker->generateDockerComposeFile($dockerPath, 8000, $this->server->branch_name);
-        if ($result) {
+        $result = DockerFacade::generateDockerComposeFile($dockerPath, 3000, $this->server->branch_name);
+        if ($result['success']) {
             $this->server->logStep("Docker compose file created at {$dockerPath}");
         } else {
-            $this->server->logStep("Failed to create Docker compose file at {$dockerPath}");
+            $this->server->logStep($result['message'], 'failed');
             $this->server->updateStatus('failed');
             return;
         }

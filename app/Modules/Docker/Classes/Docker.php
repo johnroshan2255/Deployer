@@ -4,31 +4,25 @@ namespace App\Modules\Docker\Classes;
 
 class Docker
 {
-    public const APP = 'app';
-    public const REDIS = 'redis';
-    public const MYSQL = 'mysql';
-    public const NGINX = 'nginx';
-    public const QUEUE = 'queue';
+    const APP = 'app';
+    const NGINX = 'nginx';
+    const MYSQL = 'mysql';
+    const REDIS = 'redis';
+    const QUEUE = 'queue';
 
     /**
-     * List of services in deployment order.
-     *
+     * Returns the services in the order they should be initialized
+     * 
      * @return array
      */
     public static function ordered(): array
     {
         return [
-            self::APP,
-            self::REDIS,
             self::MYSQL,
-            self::QUEUE,
+            self::REDIS,
+            self::APP,
             self::NGINX,
+            self::QUEUE
         ];
     }
-
-    public const SERVICES = [
-        'app',
-        'redis',
-        'mysql'
-    ];
 }

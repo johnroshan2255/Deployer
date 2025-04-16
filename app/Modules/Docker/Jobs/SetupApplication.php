@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Modules\Nginx\Jobs;
+namespace App\Modules\Docker\Jobs;
 
 use App\Modules\Deployer\Models\DeployedServer;
-use App\Modules\Nginx\Facades\NginxFacade;
+use App\Modules\Docker\Facades\DockerFacade;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class CreateNginxConfig implements ShouldQueue
+class SetupApplication implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -18,14 +18,11 @@ class CreateNginxConfig implements ShouldQueue
 
     public function handle(): void
     {
-        $this->server->logStep("Creating Nginx configuration...");
-        $nginxPath = base_path("deployments/{$this->server->branch_name}/nginx/config");
-
-        // Create Nginx config file
-
-        $result = NginxFacade::generateNginxConfig($nginxPath, 8000, $this->server->branch_name);
+        $this->server->logStep("Setting up application...");
+        // Start Laravel Setup
+        $result = DockerFacade::setupLaravelApp($this->server->branch_name);
         if ($result['success']) {
-            $this->server->logStep("Nginx configuration created at {$nginxPath}");
+            $this->server->logStep("Setup completed successfully.");
         } else {
             $this->server->logStep($result['message'], 'failed');
             $this->server->updateStatus('failed');

@@ -3,7 +3,7 @@
 namespace App\Modules\Git\Jobs;
 
 use App\Modules\Deployer\Models\DeployedServer;
-use App\Modules\Git\Interfaces\GitInterface;
+use App\Modules\Git\Facades\GitFacade;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -14,7 +14,7 @@ class SetupGit implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public function __construct(public DeployedServer $server, private GitInterface $git) {}
+    public function __construct(public DeployedServer $server) {}
 
     public function handle(): void
     {
@@ -27,7 +27,7 @@ class SetupGit implements ShouldQueue
             mkdir($deploymentPath, 0755, true);
         }
 
-        $cloneResult = $this->git->cloneRepository(
+        $cloneResult = GitFacade::cloneRepository(
             $this->server->repository_url,  // Repository URL from server config
             $gitPath,                       // Target path
             $this->server->branch_name      // Target branch
@@ -36,12 +36,12 @@ class SetupGit implements ShouldQueue
         if ($cloneResult['status'] === 'success') {
             $this->server->logStep("Git repository cloned successfully: {$cloneResult['message']}");
 
-            $checkoutResult = $this->git->checkoutBranch($gitPath, $this->server->branch_name);
+            $checkoutResult = GitFacade::checkoutBranch($gitPath, $this->server->branch_name);
 
             if ($checkoutResult['status'] === 'success') {
                 $this->server->logStep("Successfully checked out branch: {$this->server->branch_name}");
             } else {
-                $this->server->logStep("Failed to checkout branch: {$checkoutResult['message']}");
+                $this->server->logStep("Failed to checkout branch: {$checkoutResult['message']}", "failed");
                 $this->server->updateStatus('failed');
                 return;
             }
@@ -51,12 +51,12 @@ class SetupGit implements ShouldQueue
             if (is_dir($gitPath . '/.git')) {
                 $this->server->logStep("Repository already exists, attempting to pull latest changes...");
 
-                $pullResult = $this->git->pullChanges($gitPath, $this->server->branch_name);
+                $pullResult = GitFacade::pullChanges($gitPath, $this->server->branch_name);
 
                 if ($pullResult['status'] === 'success') {
                     $this->server->logStep("Successfully pulled latest changes: {$pullResult['message']}");
                 } else {
-                    $this->server->logStep("Failed to pull latest changes: {$pullResult['message']}");
+                    $this->server->logStep("Failed to pull latest changes: {$pullResult['message']}", "failed");
                     $this->server->updateStatus('failed');
                     return;
                 }

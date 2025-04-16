@@ -30,8 +30,9 @@ trait DeployTrait
      */
     protected function isPortInUse(int $port): bool
     {
-        $output = null;
-        exec("lsof -i :{$port}", $output);
+        $output = [];
+        exec("ss -tuln | grep ':{$port} '", $output);
         return !empty($output);
     }
+
 }
